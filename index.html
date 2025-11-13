@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Chat Virtual</title>
+
+<style>
+/* ===========================
+   WHATSAPP FULLSCREEN DESKTOP / MOBILE
+   =========================== */
+
+body {
+  margin: 0;
+  padding: 0;
+  background: #0d1418; /* fundo whatsapp moderno */
+  font-family: Arial, sans-serif;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Container PRINCIPAL — agora FULLSCREEN */
+#app {
+  width: 100%;
+  height: 100vh;
+  background: #efeae2;
+  display: flex;
+  flex-direction: column;
+}
+
+/* HEADER */
+.header {
+  height: 60px;
+  background: #075e54;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  color: white;
+}
+
+.header img {
+  width: 45px;
+  height: 45px;
+  background: #fff;
+  border-radius: 50%;
+  padding: 6px;
+  margin-right: 10px;
+}
+
+/* MENSAGENS */
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* BOLHAS */
+.bubble {
+  max-width: 75%;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  border-radius: 7px;
+  font-size: 15px;
+  line-height: 20px;
+}
+
+.from-bot { background: #fff; align-self: flex-start; }
+.from-user { background: #dcf8c6; align-self: flex-end; }
+
+/* FOOTER */
+.footer {
+  height: 60px;
+  background: #f0f0f0;
+  display: flex;
+  padding: 5px;
+  align-items: center;
+  border-top: 1px solid #ccc;
+}
+
+.footer input {
+  flex: 1;
+  height: 45px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  padding: 0 12px;
+}
+
+.footer button {
+  height: 45px;
+  width: 70px;
+  background: #075e54;
+  border: none;
+  color: white;
+  margin-left: 8px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* DIGITANDO */
+.typing {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  background: #777;
+  border-radius: 50%;
+  animation: blink 1.4s infinite;
+}
+
+.dot:nth-child(2) { animation-delay: .2s; }
+.dot:nth-child(3) { animation-delay: .4s; }
+
+@keyframes blink {
+  0% { opacity: .2; }
+  50% { opacity: 1; }
+  100% { opacity: .2; }
+}
+</style>
+
+</head>
+
+<body>
+<div id="app">
+
+  <div class="header">
+    <img src="ft.jpeg" />
+    <span style="font-size:18px;font-weight:600;">Chat Virtual</span>
+  </div>
+
+  <div class="messages" id="messages"></div>
+
+  <div class="footer">
+    <input id="input" placeholder="Digite sua mensagem..." autocomplete="off" />
+    <button id="send">Enviar</button>
+  </div>
+
+</div>
+
+<!-- SOM DE NOTIFICAÇÃO -->
+<audio id="notif">
+  <source src="https://assets.mixkit.co/sfx/download/mixkit-software-interface-back-2575.wav">
+</audio>
+
+<script>
+/* DETECTAR IDIOMA */
+function lang() {
+  const l = navigator.language || "en";
+  if (l.startsWith("pt")) return "pt";
+  if (l.startsWith("es")) return "es";
+  return "en";
+}
+const LANG = lang();
+
+/* TEXTOS INICIAIS */
+const TEXTS = {
+  pt: { greet: "A paz de Cristo esteja com você. Como posso te acompanhar hoje?" },
+  es: { greet: "La paz de Cristo esté contigo. ¿Cómo puedo acompañarte hoy?" },
+  en: { greet: "May the peace of Christ be with you. How may I accompany you today?" }
+};
+
+/* SUA NOVA KEY */
+const API_KEY = "AIzaSyBYlGjOt-8z9JBJhaOXDgMDM277uop2JeM";
+
+/* SEU MODELO EXATO */
+const MODEL_NAME = "gemini-flash-lite-latest";
+
+/* FUNÇÃO PARA ENVIAR TEXTO AO GEMINI */
+async function askGemini(userText) {
+  const prompt = `
+Você é um guia espiritual católico suave, totalmente neutro, acolhedor e humano.
+Fale de modo simples e tranquilo.
+Responda na língua do usuário (${LANG}).
+Mensagem: "${userText}"
+`;
+
+  const body = {
+    contents: [
+      {
+        role: "user",
+        parts: [{ text: prompt }]
+      }
+    ]
+  };
+
+  try {
+    const url =
+      "https://generativelanguage.googleapis.com/v1beta/models/" +
+      MODEL_NAME +
+      ":generateContent?key=" +
+      API_KEY;
+
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+
+    const data = await res.json();
+    console.log("Resposta da IA:", data);
+
+    if (data.error) {
+      console.error("ERRO DA API:", data.error);
+      return "Desculpe, houve um problema ao gerar a resposta.";
+    }
+
+    return (
+      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+      "Desculpe, não consegui responder agora."
+    );
+
+  } catch (e) {
+    console.error("ERRO NA REQUISIÇÃO:", e);
+    return "Erro inesperado ao gerar a resposta.";
+  }
+}
+
+/* SISTEMA DE MENSAGENS */
+const messages = document.getElementById("messages");
+const notif = document.getElementById("notif");
+
+function addBubble(text, from = "bot") {
+  const div = document.createElement("div");
+  div.className = "bubble " + (from === "user" ? "from-user" : "from-bot");
+  div.textContent = text;
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+/* Digitando... */
+function showTyping() {
+  const div = document.createElement("div");
+  div.id = "typing";
+  div.className = "bubble from-bot";
+  div.innerHTML = `
+    <div class="typing">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>`;
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+}
+function hideTyping() {
+  const t = document.getElementById("typing");
+  if (t) t.remove();
+}
+
+/* Envio */
+const input = document.getElementById("input");
+const send = document.getElementById("send");
+
+send.onclick = async () => {
+  const text = input.value.trim();
+  if (!text) return;
+
+  addBubble(text, "user");
+  input.value = "";
+
+  showTyping();
+  const reply = await askGemini(text);
+  hideTyping();
+
+  try { notif.play(); } catch (e) {}
+
+  addBubble(reply, "bot");
+};
+
+input.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") send.click();
+});
+
+/* Mensagem inicial */
+setTimeout(() => addBubble(TEXTS[LANG].greet), 500);
+</script>
+
+
+
+</body>
+</html>
