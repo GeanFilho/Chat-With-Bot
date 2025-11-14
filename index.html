@@ -12,7 +12,7 @@
 
 :root {
   --bg-page: #0b141a;
-  --bg-app: #efeae2;
+  --bg-chat: #efeae2;
   --header-bg: #075e54;
   --footer-bg: #f0f0f0;
   --bubble-user: #dcf8c6;
@@ -21,48 +21,46 @@
 }
 
 * {
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
 }
 
-body {
-  margin: 0;
-  padding: 0;
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
   background: var(--bg-page);
   font-family: Arial, sans-serif;
-  height: 100vh;
-  overflow: hidden;
 }
 
-/* MAIN CONTAINER */
+/* MAIN CONTAINER – FULLSCREEN ALWAYS */
 #app {
-  width: 100%;
-  height: 100dvh; /* melhor para mobile */
-  max-width: 900px;
-  margin: 0 auto;
-  background: var(--bg-app);
+  height: 100vh;
+  width: 100vw;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 0 18px rgba(0,0,0,0.35);
+  background: var(--bg-chat);
 }
 
 /* HEADER */
 .header {
-  height: 64px;
+  height: 65px;
   background: var(--header-bg);
   display: flex;
   align-items: center;
-  padding: 0 12px;
+  padding: 0 14px;
   color: white;
+  flex-shrink: 0;
 }
 
 .header img {
-  width: 44px;
-  height: 44px;
-  background: #fff;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   object-fit: cover;
   margin-right: 10px;
-  border: 2px solid rgba(255,255,255,0.6);
+  border: 2px solid rgba(255,255,255,0.7);
 }
 
 .header .title {
@@ -71,8 +69,8 @@ body {
 }
 
 .header .title span:first-child {
-  font-size: 17px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: bold;
 }
 
 .header .title span:last-child {
@@ -80,28 +78,25 @@ body {
   opacity: 0.85;
 }
 
-/* MESSAGES AREA */
+/* CHAT AREA – NOW FULLSCREEN */
 .messages {
   flex: 1;
   overflow-y: auto;
-  padding: 14px 12px;
-  display: flex;
-  flex-direction: column;
+  padding: 16px 14px;
   background: url("https://i.imgur.com/k1hVtFZ.png") repeat;
-  background-size: 320px 320px;
+  background-size: 340px 340px;
 }
 
 /* BUBBLES */
 .bubble {
   max-width: 78%;
-  padding: 9px 11px;
-  margin-bottom: 10px;
-  border-radius: 9px;
+  padding: 10px 13px;
+  margin-bottom: 12px;
+  border-radius: 10px;
   font-size: 15px;
-  line-height: 1.35;
-  color: var(--text-main);
-  word-wrap: break-word;
+  line-height: 1.4;
   white-space: pre-wrap;
+  color: var(--text-main);
 }
 
 .from-bot {
@@ -118,33 +113,34 @@ body {
 
 /* FOOTER */
 .footer {
-  min-height: 60px;
+  height: 70px;
   background: var(--footer-bg);
   display: flex;
-  padding: 7px;
+  padding: 10px;
   align-items: center;
+  gap: 10px;
   border-top: 1px solid #ccc;
-  gap: 6px;
+  flex-shrink: 0;
 }
 
 .footer input {
   flex: 1;
-  height: 46px;
-  border-radius: 23px;
+  height: 48px;
+  border-radius: 25px;
   border: 1px solid #ccc;
-  padding: 0 14px;
+  padding: 0 15px;
   font-size: 15px;
 }
 
 .footer button {
-  height: 46px;
-  min-width: 78px;
+  height: 48px;
+  min-width: 85px;
   background: #128c7e;
   border: none;
   color: white;
-  border-radius: 23px;
+  border-radius: 25px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
 }
 
@@ -172,21 +168,9 @@ body {
   100% { opacity: .2; }
 }
 
-/* SMALL SCREENS */
+/* MOBILE FIXES */
 @media (max-width: 600px) {
-  #app {
-    max-width: 100%;
-    height: 100dvh;
-    box-shadow: none;
-  }
-
-  .messages {
-    padding: 10px 8px;
-  }
-
-  .bubble {
-    font-size: 14px;
-  }
+  .bubble { font-size: 14px; }
 }
 </style>
 
@@ -218,29 +202,19 @@ body {
 </audio>
 
 <script>
-/* ============ CONFIG ============ */
-
-/* PUT YOUR API KEY HERE */
-const API_KEY = "AIzaSyBYlGjOt-8z9JBJhaOXDgMDM277uop2JeM"; // <-- paste your Google AI Studio key here
-const MODEL_NAME = "/gemini-flash-latest";
-
-/* DAILY COMFORTING RELIGIOUS GREETINGS (ENGLISH ONLY) */
-const DAILY_GREETINGS = [
-  "May the peace of Christ calm your heart today. What would you like to share with me?",
-  "You are not alone today. God walks with you in every step. What’s on your mind?",
-  "God knows your heart even when words are hard to find. How can I be here for you right now?",
-  "Today is a new chance to rest in God’s love. What would you like to talk about?",
-  "Even on heavy days, grace is still near. Tell me what you’re feeling today.",
-  "God sees every tear and every small victory. What’s happening in your heart today?",
-  "You are loved, seen, and held by God. What would you like to open up about today?"
+/* ========= DAILY GREETINGS ========= */
+const DAILY = [
+  "May God’s peace rest gently on your heart today. What would you like to share?",
+  "You are not alone. God walks with you even now. Tell me what’s on your heart.",
+  "Even on heavy days, grace is near. I'm here with you. What's going on today?",
+  "God knows your worries and your hopes. What would you like to talk about?",
+  "You are loved and seen by God. Whatever you're feeling, you can share it with me.",
+  "Today is a new chance to breathe in His peace. How can I walk with you today?",
+  "God holds your heart gently. What’s the first thing on your mind today?"
 ];
 
-/* CHOOSE GREETING BASED ON DAY (CHANGES EVERY DAY) */
-function getDailyGreeting() {
-  const today = new Date();
-  const index = today.getDate() % DAILY_GREETINGS.length;
-  return DAILY_GREETINGS[index];
-}
+const API_KEY = "YOUR_API_KEY_HERE";  // <-- COLE SUA KEY
+const MODEL = "gemini-flash-lite-latest";
 
 /* ELEMENTS */
 const messages = document.getElementById("messages");
@@ -248,17 +222,17 @@ const notif = document.getElementById("notif");
 const input = document.getElementById("input");
 const send = document.getElementById("send");
 
-/* ADD MESSAGE BUBBLE */
-function addBubble(text, from = "bot") {
+/* ADD MESSAGE */
+function addBubble(msg, from="bot") {
   const div = document.createElement("div");
   div.className = "bubble " + (from === "user" ? "from-user" : "from-bot");
-  div.textContent = text;
+  div.textContent = msg;
   messages.appendChild(div);
   messages.scrollTop = messages.scrollHeight;
 }
 
 /* TYPING INDICATOR */
-function showTyping() {
+function typingShow() {
   const div = document.createElement("div");
   div.id = "typing";
   div.className = "bubble from-bot";
@@ -271,97 +245,71 @@ function showTyping() {
   messages.appendChild(div);
   messages.scrollTop = messages.scrollHeight;
 }
-function hideTyping() {
+function typingHide() {
   const t = document.getElementById("typing");
   if (t) t.remove();
 }
 
-/* CALL GEMINI */
-async function askGemini(userText) {
+/* GEMINI CALL */
+async function askGemini(text) {
   const prompt = `
-You are a gentle, warm, Christian spiritual companion.
-Speak in natural, simple English, like a close friend who believes in God.
-Always reply with short, comforting messages (1 to 3 short sentences).
-Be personal, empathetic, calm and encouraging.
-Never preach or lecture, just walk beside the person.
-User message: "${userText}"
-  `;
+You are a gentle Christian companion.
+Speak only English.
+Reply like a real conversation: short, warm, personal, human.
+1–3 short sentences maximum.
+Stay comforting and peaceful.
+Message: "${text}"
+`;
 
-  const body = {
-    contents: [
-      {
-        role: "user",
-        parts: [{ text: prompt }]
-      }
-    ]
-  };
+  const body = { contents: [{ role:"user", parts:[{ text:prompt }] }] };
 
-  try {
-    const url =
-      "https://generativelanguage.googleapis.com/v1beta/models/" +
-      MODEL_NAME +
-      ":generateContent?key=" +
-      API_KEY;
-
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body)
-    });
-
-    const data = await res.json();
-    console.log("AI response:", data);
-
-    if (data.error) {
-      console.error("API ERROR:", data.error);
-      return "I’m sorry, there was a problem creating a response. You can try again in a moment.";
+  const res = await fetch(
+    "https://generativelanguage.googleapis.com/v1beta/models/" +
+    MODEL +
+    ":generateContent?key=" + API_KEY,
+    {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify(body)
     }
+  );
 
-    return (
-      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "I’m sorry, I couldn’t find the right words right now, but I’m here with you."
-    );
+  const data = await res.json();
 
-  } catch (e) {
-    console.error("REQUEST ERROR:", e);
-    return "Something unexpected happened, but I’m still here for you.";
-  }
+  return data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+    "I'm here for you. You can try again.";
 }
 
-/* SEND HANDLER */
+/* SEND MESSAGE */
 async function handleSend() {
-  const text = input.value.trim();
-  if (!text) return;
+  const txt = input.value.trim();
+  if (!txt) return;
 
-  addBubble(text, "user");
+  addBubble(txt, "user");
   input.value = "";
 
-  showTyping();
+  typingShow();
+  const replyP = askGemini(txt);
 
-  const replyPromise = askGemini(text);
-
-  // Small delay just to make typing feel natural
   await new Promise(r => setTimeout(r, 250));
 
-  const reply = await replyPromise;
+  const reply = await replyP;
+  typingHide();
 
-  hideTyping();
-
-  try { notif.play(); } catch (e) {}
+  try { notif.play(); } catch(e){}
 
   addBubble(reply, "bot");
 }
 
 /* EVENTS */
 send.onclick = handleSend;
-input.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") handleSend();
-});
+input.onkeydown = e => (e.key === "Enter" ? handleSend() : null);
 
-/* INITIAL DAILY MESSAGE */
+/* DAILY START MESSAGE */
 setTimeout(() => {
-  addBubble(getDailyGreeting(), "bot");
-}, 500);
+  const day = new Date().getDate() % DAILY.length;
+  addBubble(DAILY[day], "bot");
+}, 600);
 </script>
 
 </body>
