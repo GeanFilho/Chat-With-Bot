@@ -6,10 +6,6 @@
 <title>Chat Virtual</title>
 
 <style>
-/* ===========================
-   FULLSCREEN WHATSAPP-LIKE CHAT
-   =========================== */
-
 :root {
   --bg-page: #0b141a;
   --bg-chat: #efeae2;
@@ -26,18 +22,24 @@
   box-sizing: border-box;
 }
 
+/* html/body preparados pra mobile */
 html, body {
-  height: 100%;
   width: 100%;
-  overflow: hidden;
-  background: var(--bg-page);
+  height: 100%;
   font-family: Arial, sans-serif;
+  background: var(--bg-page);
 }
 
-/* MAIN CONTAINER – FULLSCREEN */
+/* body usa a altura VISÍVEL do aparelho */
+body {
+  min-height: 100dvh;   /* corrige quebra no celular */
+  overflow: hidden;     /* evita scroll duplo, só o chat rola */
+}
+
+/* CONTAINER PRINCIPAL – FULLSCREEN EM QUALQUER TELA */
 #app {
-  height: 100vh;
   width: 100vw;
+  height: 100dvh;       /* altura dinâmica, acompanha barra do navegador */
   display: flex;
   flex-direction: column;
   background: var(--bg-chat);
@@ -78,17 +80,17 @@ html, body {
   opacity: 0.85;
 }
 
-/* CHAT AREA */
+/* ÁREA DO CHAT */
 .messages {
   flex: 1;
   overflow-y: auto;
   padding: 16px 14px;
   background: var(--bg-chat);
-  display: flex;              /* IMPORTANTE pro align-self funcionar */
-  flex-direction: column;     /* Bubbles em coluna */
+  display: flex;
+  flex-direction: column;
 }
 
-/* BUBBLES */
+/* BOLHAS */
 .bubble {
   max-width: 78%;
   padding: 10px 13px;
@@ -169,7 +171,7 @@ html, body {
   100% { opacity: .2; }
 }
 
-/* MOBILE AJUSTES */
+/* MOBILE FINO */
 @media (max-width: 600px) {
   .bubble { font-size: 14px; }
 }
@@ -217,7 +219,7 @@ const DAILY = [
 const API_KEY = "AIzaSyBYlGjOt-8z9JBJhaOXDgMDM277uop2JeM";  // <-- COLE SUA KEY AQUI
 const MODEL = "gemini-flash-lite-latest";
 
-/* ELEMENTS */
+/* ELEMENTOS */
 const messages = document.getElementById("messages");
 const notif = document.getElementById("notif");
 const input = document.getElementById("input");
