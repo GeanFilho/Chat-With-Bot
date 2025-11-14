@@ -30,11 +30,11 @@ html, body {
 }
 
 body {
-  min-height: 100dvh;   /* corrige bug de altura no celular */
+  min-height: 100dvh;
   overflow: hidden;
 }
 
-/* CONTAINER PRINCIPAL – FULLSCREEN */
+/* FULLSCREEN APP */
 #app {
   width: 100vw;
   height: 100dvh;
@@ -63,11 +63,6 @@ body {
   border: 2px solid rgba(255,255,255,0.7);
 }
 
-.header .title {
-  display: flex;
-  flex-direction: column;
-}
-
 .header .title span:first-child {
   font-size: 18px;
   font-weight: bold;
@@ -78,7 +73,7 @@ body {
   opacity: 0.85;
 }
 
-/* ÁREA DO CHAT */
+/* CHAT AREA */
 .messages {
   flex: 1;
   overflow-y: auto;
@@ -88,28 +83,27 @@ body {
   flex-direction: column;
 }
 
-/* BOLHAS */
+/* BUBBLES */
 .bubble {
   max-width: 78%;
-  padding: 10px 13px;
+  padding: 11px 14px;
   margin-bottom: 12px;
-  border-radius: 10px;
+  border-radius: 12px;
   font-size: 15px;
-  line-height: 1.4;
+  line-height: 1.45;
   white-space: pre-wrap;
-  color: var(--text-main);
 }
 
 .from-bot {
   background: var(--bubble-bot);
-  align-self: flex-start;         /* ESQUERDA */
-  border-bottom-left-radius: 0;
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
 }
 
 .from-user {
   background: var(--bubble-user);
-  align-self: flex-end;           /* DIREITA */
-  border-bottom-right-radius: 0;
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
 }
 
 /* FOOTER */
@@ -169,7 +163,7 @@ body {
   100% { opacity: .2; }
 }
 
-/* MOBILE */
+/* MOBILE FIX */
 @media (max-width: 600px) {
   .bubble { font-size: 14px; }
 }
@@ -197,37 +191,35 @@ body {
 
 </div>
 
-<!-- SOM DE NOTIFICAÇÃO -->
 <audio id="notif">
   <source src="https://assets.mixkit.co/sfx/download/mixkit-software-interface-back-2575.wav">
 </audio>
 
 <script>
-/* ========= CONFIG ========= */
-/*
-  ⚠️ COLE A SUA API KEY AQUI.
-  Por segurança eu não posso colocar sua chave diretamente,
-  mas é só substituir "YOUR_API_KEY_HERE" pela sua.
-*/
-const API_KEY = "AIzaSyBYlGjOt-8z9JBJhaOXDgMDM277uop2JeM";  // <--- COLE SUA KEY AQUI
-const MODEL = "gemini-flash-lite-latest";
+/* ===========================================
+   🔑 COLE SUA API KEY DO GEMINI AQUI
+=========================================== */
+const API_KEY = "AIzaSyBYlGjOt-8z9JBJhaOXDgMDM277uop2JeM";  // <-- COLE SUA KEY
 
-/* ELEMENTOS */
+/* MODELO ATUALIZADO */
+const MODEL = "gemini-flash-latest";
+
+/* ELEMENTS */
 const messages = document.getElementById("messages");
 const notif = document.getElementById("notif");
 const input = document.getElementById("input");
 const send = document.getElementById("send");
 
-/* ADICIONAR MENSAGEM NA TELA */
-function addBubble(msg, from = "bot") {
+/* ADD BUBBLE */
+function addBubble(text, from = "bot") {
   const div = document.createElement("div");
   div.className = "bubble " + (from === "user" ? "from-user" : "from-bot");
-  div.textContent = msg;
+  div.textContent = text;
   messages.appendChild(div);
   messages.scrollTop = messages.scrollHeight;
 }
 
-/* TYPING INDICATOR */
+/* TYPING */
 function typingShow() {
   const div = document.createElement("div");
   div.id = "typing";
@@ -247,82 +239,81 @@ function typingHide() {
   if (t) t.remove();
 }
 
-/* CHAMADA GEMINI */
-async function askGemini(text) {
+/* GEMINI REQUEST — IMPROVED NATURALITY */
+async function askGemini(userText) {
   const prompt = `
-You are a gentle Christian companion.
-Speak only English.
-Reply like a real conversation: short, warm, personal, human.
-1–3 short sentences maximum.
-Stay comforting and peaceful.
-User message: "${text}"
+You are a gentle, peaceful Christian companion.
+Speak ONLY in English.
+Sound natural, warm, and truly human — like a real conversation.
+
+STYLE RULES:
+- 2 to 4 sentences maximum.
+- Soft, comforting, clear tone.
+- Slightly personal, like you're truly present.
+- Avoid robotic replies.
+- Keep the message flowing naturally.
+
+User said: "${userText}"
 `;
 
-  const body = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
+  const body = {
+    contents: [
+      {
+        role: "user",
+        parts: [{ text: prompt }]
+      }
+    ]
+  };
 
   try {
     const res = await fetch(
       "https://generativelanguage.googleapis.com/v1beta/models/" +
         MODEL +
-        ":generateContent?key=" +
-        API_KEY,
+        ":generateContent?key=" + API_KEY,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: JSON.stringify(body)
       }
     );
 
     const data = await res.json();
-    console.log("AI response:", data);
+    console.log("AI:", data);
 
-    if (data.error) {
-      console.error("API ERROR:", data.error);
-      return "I'm sorry, there was a problem creating a response. You can try again in a moment.";
-    }
+    if (data.error)
+      return "I'm sorry, something went wrong. You can try again whenever you're ready.";
 
-    return (
-      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "I'm here for you. You can try again."
-    );
+    return data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+           "I'm here with you. Try again, if you'd like.";
   } catch (e) {
-    console.error("REQUEST ERROR:", e);
-    return "Something unexpected happened, but I’m still here for you.";
+    return "I’m still here with you, even if something went wrong for a moment.";
   }
 }
 
-/* ENVIAR MENSAGEM */
+/* SEND MESSAGE */
 async function handleSend() {
-  const txt = input.value.trim();
-  if (!txt) return;
+  const text = input.value.trim();
+  if (!text) return;
 
-  addBubble(txt, "user");
+  addBubble(text, "user");
   input.value = "";
 
   typingShow();
-  const replyPromise = askGemini(txt);
+  const replyPromise = askGemini(text);
 
-  await new Promise((r) => setTimeout(r, 250));
+  await new Promise((r) => setTimeout(r, 300));
 
   const reply = await replyPromise;
   typingHide();
 
-  try {
-    notif.play();
-  } catch (e) {}
+  try { notif.play(); } catch(e){}
 
   addBubble(reply, "bot");
 }
 
-/* EVENTOS */
 send.onclick = handleSend;
-input.onkeydown = (e) => {
-  if (e.key === "Enter") handleSend();
-};
+input.onkeydown = (e) => { if (e.key === "Enter") handleSend(); };
 
-/* SEM MENSAGEM INICIAL
-   → a conversa só começa quando o usuário mandar algo */
 </script>
-
 </body>
 </html>
