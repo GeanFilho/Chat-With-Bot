@@ -63,14 +63,23 @@ body {
   border: 2px solid rgba(255,255,255,0.7);
 }
 
-.header .title span:first-child {
+/* Title block (Name + Status) */
+.header .title {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  line-height: 1.2;
+}
+
+.header .title .name {
   font-size: 18px;
   font-weight: bold;
 }
 
-.header .title span:last-child {
+.header .title .status {
   font-size: 12px;
   opacity: 0.85;
+  margin-top: 2px;
 }
 
 /* CHAT AREA */
@@ -168,7 +177,6 @@ body {
   .bubble { font-size: 14px; }
 }
 </style>
-
 </head>
 
 <body>
@@ -177,8 +185,8 @@ body {
   <div class="header">
     <img src="ft.jpeg" alt="Profile" />
     <div class="title">
-      <span>Chat Virtual</span>
-      <span>online now</span>
+      <div class="name">Chat Virtual</div>
+      <div class="status">online now</div>
     </div>
   </div>
 
@@ -199,18 +207,18 @@ body {
 /* ===========================================
    🔑 COLE SUA API KEY DO GEMINI AQUI
 =========================================== */
-const API_KEY = "AIzaSyBYlGjOt-8z9JBJhaOXDgMDM277uop2JeM";  // <-- COLE SUA KEY
+const API_KEY = "AIzaSyBYlGjOt-8z9JBJhaOXDgMDM277uop2JeM";
 
-/* MODELO ATUALIZADO */
+/* Modelo atualizado */
 const MODEL = "gemini-flash-latest";
 
-/* ELEMENTS */
+/* Elements */
 const messages = document.getElementById("messages");
 const notif = document.getElementById("notif");
 const input = document.getElementById("input");
 const send = document.getElementById("send");
 
-/* ADD BUBBLE */
+/* Add Bubble */
 function addBubble(text, from = "bot") {
   const div = document.createElement("div");
   div.className = "bubble " + (from === "user" ? "from-user" : "from-bot");
@@ -219,7 +227,7 @@ function addBubble(text, from = "bot") {
   messages.scrollTop = messages.scrollHeight;
 }
 
-/* TYPING */
+/* Typing Animation */
 function typingShow() {
   const div = document.createElement("div");
   div.id = "typing";
@@ -239,7 +247,7 @@ function typingHide() {
   if (t) t.remove();
 }
 
-/* GEMINI REQUEST — IMPROVED NATURALITY */
+/* Gemini Request */
 async function askGemini(userText) {
   const prompt = `
 You are a gentle, peaceful Christian companion.
@@ -247,11 +255,11 @@ Speak ONLY in English.
 Sound natural, warm, and truly human — like a real conversation.
 
 STYLE RULES:
-- 2 to 4 sentences maximum.
-- Soft, comforting, clear tone.
-- Slightly personal, like you're truly present.
-- Avoid robotic replies.
-- Keep the message flowing naturally.
+- 2 to 4 short sentences.
+- Soft, comforting tone.
+- Human, warm, personal.
+- Avoid robotic or generic phrasing.
+- Maintain a calm, spiritual vibe.
 
 User said: "${userText}"
 `;
@@ -284,9 +292,10 @@ User said: "${userText}"
       return "I'm sorry, something went wrong. You can try again whenever you're ready.";
 
     return data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-           "I'm here with you. Try again, if you'd like.";
+           "I'm here with you. Try again if you'd like.";
+
   } catch (e) {
-    return "I’m still here with you, even if something went wrong for a moment.";
+    return "I’m still here with you, even if something went wrong.";
   }
 }
 
@@ -312,8 +321,9 @@ async function handleSend() {
 }
 
 send.onclick = handleSend;
-input.onkeydown = (e) => { if (e.key === "Enter") handleSend(); };
-
+input.onkeydown = (e) => {
+  if (e.key === "Enter") handleSend();
+};
 </script>
 </body>
 </html>
