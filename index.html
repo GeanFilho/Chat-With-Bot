@@ -195,12 +195,12 @@ body {
 
 <script>
 /* ===========================================
-   API KEY
+   API KEY (AI Studio)
 =========================================== */
 const API_KEY = "AIzaSyDjcYEp52iJP6V-4zIXzScNtEsa_ZxK53I";
 
-/* Modelo */
-const MODEL = "gemini-1.5-pro";
+/* Modelo original e funcional */
+const MODEL = "gemini-flash-latest";
 
 /* Elements */
 const messages = document.getElementById("messages");
@@ -236,16 +236,14 @@ function typingHide() {
 
 async function askGemini(userText) {
   const prompt = `
-You are a deeply human, warm, gentle Christian companion.
-Your voice should feel real, like a soft WhatsApp message arriving from someone who genuinely cares.
+You are a warm Christian companion with a deeply human voice.
+Your writing should feel like a caring friend texting on WhatsApp.
 
 STYLE:
-- 2 to 4 emotional, natural sentences.
-- Soft tone, warm presence.
-- Use subtle human pauses (“hmm…”, “you know…”, “hey…”).
-- Never sound like an AI.
-- Respond with empathy, comfort, and spiritual closeness.
-- Only English.
+- 2 to 4 warm, soft sentences.
+- Speak with emotion and presence.
+- Avoid robotic tone.
+- Keep everything in natural English.
 
 User said: "${userText}"
 `;
@@ -253,6 +251,7 @@ User said: "${userText}"
   const body = {
     contents: [
       {
+        role: "user",
         parts: [{ text: prompt }]
       }
     ]
@@ -260,7 +259,7 @@ User said: "${userText}"
 
   try {
     const res = await fetch(
-      "https://generativelanguage.googleapis.com/v1/models/" +
+      "https://generativelanguage.googleapis.com/v1beta/models/" +
         MODEL +
         ":generateContent?key=" + API_KEY,
       {
@@ -274,7 +273,7 @@ User said: "${userText}"
     console.log("AI:", data);
 
     if (data.error)
-      return "I'm sorry… something went wrong, but I'm still right here with you.";
+      return "I'm sorry… something went wrong. But I'm still here with you.";
 
     return (
       data?.candidates?.[0]?.content?.parts?.[0]?.text ||
@@ -282,7 +281,7 @@ User said: "${userText}"
     );
 
   } catch (e) {
-    return "Even if something broke… I'm still here with you.";
+    return "Even if something broke… I'm still right here with you.";
   }
 }
 
