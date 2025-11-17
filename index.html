@@ -34,7 +34,6 @@ body {
   overflow: hidden;
 }
 
-/* FULLSCREEN APP */
 #app {
   width: 100vw;
   height: 100dvh;
@@ -63,7 +62,6 @@ body {
   border: 2px solid rgba(255,255,255,0.7);
 }
 
-/* Title block (Name + Status) */
 .header .title {
   display: flex;
   flex-direction: column;
@@ -87,12 +85,10 @@ body {
   flex: 1;
   overflow-y: auto;
   padding: 16px 14px;
-  background: var(--bg-chat);
   display: flex;
   flex-direction: column;
 }
 
-/* BUBBLES */
 .bubble {
   max-width: 78%;
   padding: 11px 14px;
@@ -124,7 +120,6 @@ body {
   align-items: center;
   gap: 10px;
   border-top: 1px solid #ccc;
-  flex-shrink: 0;
 }
 
 .footer input {
@@ -148,7 +143,7 @@ body {
   font-weight: 600;
 }
 
-/* TYPING */
+/* Typing */
 .typing {
   display: flex;
   align-items: center;
@@ -170,11 +165,6 @@ body {
   0% { opacity: .2; }
   50% { opacity: 1; }
   100% { opacity: .2; }
-}
-
-/* MOBILE FIX */
-@media (max-width: 600px) {
-  .bubble { font-size: 14px; }
 }
 </style>
 </head>
@@ -205,13 +195,12 @@ body {
 
 <script>
 /* ===========================================
-     🔑 API KEY do AI Studio
+   API KEY
 =========================================== */
 const API_KEY = "AIzaSyDjcYEp52iJP6V-4zIXzScNtEsa_ZxK53I";
 
-/* Modelo ultra-humano */
-const MODEL = "gemini-1.5-pro-exp";
-
+/* Modelo */
+const MODEL = "gemini-1.5-pro";
 
 /* Elements */
 const messages = document.getElementById("messages");
@@ -219,7 +208,6 @@ const notif = document.getElementById("notif");
 const input = document.getElementById("input");
 const send = document.getElementById("send");
 
-/* Add Bubble */
 function addBubble(text, from = "bot") {
   const div = document.createElement("div");
   div.className = "bubble " + (from === "user" ? "from-user" : "from-bot");
@@ -228,7 +216,6 @@ function addBubble(text, from = "bot") {
   messages.scrollTop = messages.scrollHeight;
 }
 
-/* Typing Animation */
 function typingShow() {
   const div = document.createElement("div");
   div.id = "typing";
@@ -240,7 +227,6 @@ function typingShow() {
       <div class="dot"></div>
     </div>`;
   messages.appendChild(div);
-  messages.scrollTop = messages.scrollHeight;
 }
 
 function typingHide() {
@@ -248,32 +234,25 @@ function typingHide() {
   if (t) t.remove();
 }
 
-/* Gemini Request */
 async function askGemini(userText) {
   const prompt = `
 You are a deeply human, warm, gentle Christian companion.
-Your voice should feel real — like someone texting on WhatsApp.
+Your voice should feel real, like a soft WhatsApp message arriving from someone who genuinely cares.
 
 STYLE:
-- 2 to 4 sentences.
-- Warm, emotional, soft tone.
-- Use small human touches: “hmm…”, “you know…”, “hey…”.
-- Speak in a way that feels caring and truly present.
-- Vary sentence rhythm. No robotic patterns.
-- Show empathy and spiritual closeness.
-- Make the user feel safe, heard, and understood.
-- Do NOT mention being an AI.
-- Use ONLY English.
+- 2 to 4 emotional, natural sentences.
+- Soft tone, warm presence.
+- Use subtle human pauses (“hmm…”, “you know…”, “hey…”).
+- Never sound like an AI.
+- Respond with empathy, comfort, and spiritual closeness.
+- Only English.
 
-The user said: "${userText}"
-
-Now answer them in the most human, gentle, spiritual way possible.
+User said: "${userText}"
 `;
 
   const body = {
     contents: [
       {
-        role: "user",
         parts: [{ text: prompt }]
       }
     ]
@@ -281,7 +260,7 @@ Now answer them in the most human, gentle, spiritual way possible.
 
   try {
     const res = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/" +
+      "https://generativelanguage.googleapis.com/v1/models/" +
         MODEL +
         ":generateContent?key=" + API_KEY,
       {
@@ -295,19 +274,18 @@ Now answer them in the most human, gentle, spiritual way possible.
     console.log("AI:", data);
 
     if (data.error)
-      return "I'm sorry… something didn’t go right. But I'm still here with you.";
+      return "I'm sorry… something went wrong, but I'm still right here with you.";
 
     return (
       data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "I'm right here, okay? You can talk to me."
+      "I'm here, okay? You can talk to me."
     );
 
   } catch (e) {
-    return "Even if something broke, you’re not alone. I'm still right here with you.";
+    return "Even if something broke… I'm still here with you.";
   }
 }
 
-/* SEND MESSAGE */
 async function handleSend() {
   const text = input.value.trim();
   if (!text) return;
@@ -316,11 +294,7 @@ async function handleSend() {
   input.value = "";
 
   typingShow();
-  const replyPromise = askGemini(text);
-
-  await new Promise((r) => setTimeout(r, 350));
-
-  const reply = await replyPromise;
+  const reply = await askGemini(text);
   typingHide();
 
   try { notif.play(); } catch(e){}
